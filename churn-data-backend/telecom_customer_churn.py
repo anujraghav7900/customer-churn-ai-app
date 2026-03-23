@@ -221,3 +221,7 @@ joblib.dump(threshold, "churn_threshold.pkl")
 
 print("Threshold saved successfully.")
 
+import joblib
+
+joblib.dump(model, "churn_model.pkl")
+joblib.dump(threshold, "churn_threshold.pkl")
