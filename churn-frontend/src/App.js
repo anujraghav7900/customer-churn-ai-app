@@ -1,76 +1,60 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 function App() {
-  const [tenure, setTenure] = useState(5);
-  const [monthlyCharges, setMonthlyCharges] = useState(90.5);
   const [result, setResult] = useState(null);
 
   const handlePredict = async () => {
-    const data = {
-      gender: "Female",
-      SeniorCitizen: 0,
-      Partner: "Yes",
-      Dependents: "No",
-      tenure: tenure,
-      PhoneService: "Yes",
-      MultipleLines: "No",
-      InternetService: "Fiber optic",
-      OnlineSecurity: "No",
-      OnlineBackup: "No",
-      DeviceProtection: "No",
-      TechSupport: "No",
-      StreamingTV: "Yes",
-      StreamingMovies: "Yes",
-      Contract: "Month-to-month",
-      PaperlessBilling: "Yes",
-      PaymentMethod: "Electronic check",
-      MonthlyCharges: monthlyCharges,
-      TotalCharges: tenure * monthlyCharges
-    };
-
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/predict",
-        data
+      const data = {
+        gender: "Male",
+        SeniorCitizen: 0,
+        Partner: "Yes",
+        Dependents: "No",
+        tenure: 12,
+        PhoneService: "Yes",
+        MultipleLines: "No",
+        InternetService: "DSL",
+        OnlineSecurity: "No",
+        OnlineBackup: "Yes",
+        DeviceProtection: "No",
+        TechSupport: "No",
+        StreamingTV: "No",
+        StreamingMovies: "No",
+        Contract: "Month-to-month",
+        PaperlessBilling: "Yes",
+        PaymentMethod: "Electronic check",
+        MonthlyCharges: 70,
+        TotalCharges: 800
+      };
+
+      const response = await fetch(
+        "https://anuj-raghavx-customer-churn.up.railway.app/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        }
       );
-      setResult(response.data);
+
+      const result = await response.json();
+      setResult(result);
     } catch (error) {
-      console.error(error);
-      alert("Error connecting to API");
+      console.error("Error:", error);
     }
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Telecom Churn Prediction</h1>
-
-      <div>
-        <label>Tenure: </label>
-        <input
-          type="number"
-          value={tenure}
-          onChange={(e) => setTenure(Number(e.target.value))}
-        />
-      </div>
-
-      <div>
-        <label>Monthly Charges: </label>
-        <input
-          type="number"
-          value={monthlyCharges}
-          onChange={(e) => setMonthlyCharges(Number(e.target.value))}
-        />
-      </div>
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h1>Customer Churn Prediction</h1>
 
       <button onClick={handlePredict}>Predict</button>
 
       {result && (
-        <div style={{ marginTop: 20 }}>
-          <h3>Churn Probability: {result.churn_probability}</h3>
-          <h3>
-            Prediction: {result.prediction === 1 ? "Will Churn" : "Will Stay"}
-          </h3>
+        <div style={{ marginTop: "20px" }}>
+          <h2>Prediction: {result.prediction}</h2>
+          <h3>Probability: {result.churn_probability}</h3>
         </div>
       )}
     </div>

@@ -2,30 +2,37 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
 import pandas as pd
+import os
 
-# Load model and threshold
-model = joblib.load("churn_model.pkl")
-threshold = joblib.load("churn_threshold.pkl")
+# -----------------------------
+# Load model safely (IMPORTANT)
+# -----------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+model = joblib.load(os.path.join(BASE_DIR, "churn_model.pkl"))
+threshold = joblib.load(os.path.join(BASE_DIR, "churn_threshold.pkl"))
+
+# -----------------------------
+# App init (ONLY ONCE)
+# -----------------------------
 app = FastAPI()
 
+# -----------------------------
+# CORS (Frontend access fix)
+# -----------------------------
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
-
-# Allow frontend connection
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development (later restrict)
+    allow_origins=["*"],  # (later restrict to Vercel URL)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # -----------------------------
-# Define Input Schema
+# Input Schema
 # -----------------------------
-
 class Customer(BaseModel):
     gender: str
     SeniorCitizen: int
@@ -47,15 +54,15 @@ class Customer(BaseModel):
     MonthlyCharges: float
     TotalCharges: float
 
-
+# -----------------------------
+# Routes
+# -----------------------------
 @app.get("/")
 def home():
     return {"message": "Telecom Customer Churn API is running 🚀"}
 
-
 @app.post("/predict")
 def predict_churn(customer: Customer):
-
     input_df = pd.DataFrame([customer.dict()])
 
     prob = model.predict_proba(input_df)[0][1]
